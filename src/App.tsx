@@ -1,8 +1,9 @@
+import Loader from "./common/components/loader/Loader";
+import SearchJobs from "./pages/searchJobs/SearchJobs";
+
 function App() {
   return (
-    <div className="App">
-      React
-    </div>
+    <><SearchJobs /><Loader /></>
   );
 }
 
