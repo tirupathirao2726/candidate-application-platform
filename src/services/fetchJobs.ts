@@ -11,11 +11,14 @@ const fetchJobList = async (limit:number,offset:number) => {
     headers: myHeaders,
     body
    };
-   
-   fetch("https://api.weekday.technology/adhoc/getSampleJdJSON", requestOptions)
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.error(error));
+   try{
+      const repsonse = await fetch("https://api.weekday.technology/adhoc/getSampleJdJSON", requestOptions);
+      const result = await repsonse.json();
+      return result;
+   }
+   catch(error){
+    console.log("error:",error);
+   }
 }
 
 export default fetchJobList;
