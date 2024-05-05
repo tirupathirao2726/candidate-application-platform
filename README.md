@@ -2,6 +2,14 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+### steps to run project
+1) Install node >=18
+1) Navigate to project root directory 
+2) npm install
+4) npm start
+5) paste the url in browser http://localhost:3000
+6) Now able to see running project
+
 ## Available Scripts
 
 In the project directory, you can run:
