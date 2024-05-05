@@ -1,30 +1,62 @@
-import { useEffect } from "react";
+
 import JobCard from "../../common/components/jobCard/JobCard";
-import fetchJobList from "../../services/fetchJobs";
-import { useDispatch, useSelector } from "react-redux";
-import { addJobs } from "../../reducerSlices/jobListingSlice";
-import { updateIsLoading } from "../../reducerSlices/loaderSlice";
 import { Grid } from "@mui/material";
 import './SearchJobsStyles.css';
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { updateIsLoading } from "../../reducerSlices/loaderSlice";
+import { constants } from "../../common/constants/constants";
+import { addJobs } from "../../reducerSlices/jobListingSlice";
+
 const SearchJobs = () => {
+
+  const {currentJobs} = useSelector((state:any)=> state.jobs);
   const dispatch = useDispatch();
-  const { currentJobs, limit,currentOffset } = useSelector((state: any) => state.jobs);
+  const [offset, setOffset] = useState<number>(0);
   useEffect(() => {
-    dispatch(updateIsLoading(true));
-    fetchJobList(limit, currentOffset)
-      .then((res: any) => {
-        dispatch(addJobs(res));
-      })
-      .catch((err) => {
-        console.log("err--", err);
-      });
-    dispatch(updateIsLoading(false));
-  }, [limit,currentOffset,dispatch]);
+    const fetchData = async () => {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      const body = JSON.stringify({
+        "limit": constants.limit,
+        "offset": offset
+       });
+       const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body
+       }
+      try {
+        dispatch(updateIsLoading(true));
+        const response = await fetch(
+          constants.url, requestOptions
+        );
+        const result = await response.json();
+        dispatch(addJobs({currentJobs:result.jdList}));
+      } catch (error) {
+        console.log("error:",error);
+      }
+      finally{
+        dispatch(updateIsLoading(false));
+      }
+    };
+    fetchData();
+
+    const handleScroll = (e:any) => {
+      const scrollHeight = e.target.documentElement.scrollHeight;
+      const currentHeight =
+        e.target.documentElement.scrollTop + window.innerHeight;
+      if (currentHeight + 1 >= scrollHeight) {
+        setOffset(offset + constants.limit);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [dispatch, offset]);
   return (
-    <section  className="jobslist-section"> 
-      {
-        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-        {currentJobs.map((job:any) => (
+    <section className="jobslist-section">
+      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+        {currentJobs.map((job: any) => (
           <Grid item xs={2} sm={4} md={4} key={job.jdUid}>
             <JobCard
               jobId={job.jdUid}
@@ -43,7 +75,6 @@ const SearchJobs = () => {
           </Grid>
         ))}
       </Grid>
-      }
     </section>
   );
 };
